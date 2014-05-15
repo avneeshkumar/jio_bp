@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">jio_bp</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Logout</string>
+    <string name="BP">Take BP</string>
+    <string name="data">Get data</string>
+    <string name="patient">Patient Name: Avneesh </string>
+    <string name="nodata">No data Available of the patient</string>
+    
+</resources>

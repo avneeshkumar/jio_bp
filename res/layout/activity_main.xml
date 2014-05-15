@@ -1,0 +1,51 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jio_bp.MainActivity"
+    tools:ignore="MergeRootFrame" >
+
+    <Button
+        android:id="@+id/getbp"
+        style="@style/ButtonText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/takebp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/btn_red"
+        android:text="@string/data" />
+
+    <Button
+        android:id="@+id/takebp"
+        style="@style/ButtonText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/btn_red"
+        android:text="@string/BP" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/takebp"
+        android:layout_below="@+id/getbp"
+        android:layout_marginTop="19dp"
+        android:text="@string/patient"
+        android:textSize="20sp"
+        android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="58dp"
+        android:text="@string/nodata"
+        android:textSize="30sp" />
+
+</RelativeLayout>
