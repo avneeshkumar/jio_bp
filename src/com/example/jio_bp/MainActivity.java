@@ -1,13 +1,18 @@
 package com.example.jio_bp;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.TelephonyManager;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -416,21 +421,49 @@ public class MainActivity extends ActionBarActivity {
 			String str = api_n.getString(0);
 			JSONObject reader_temp1;
 			reader_temp1 = new JSONObject(str);
+			final String hr = reader_temp1.getString("HR");
+			final String hp = reader_temp1.getString("HP");
+			final String lp = reader_temp1.getString("LP");
+			TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+			final String imei=telephonyManager.getDeviceId();
+			Toast.makeText(getApplicationContext(),imei, Toast.LENGTH_SHORT).show();
+			
 			if(reader_temp1.getString("DataID").equals(sharedpreferences.getString(lastdataid, ""))){
 				
 				AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
 				 
 		        // Setting Dialog Title
-		        alertDialog.setTitle("BP NOT taken");
+		        alertDialog.setTitle("Stale data");
 		 
 		        // Setting Dialog Message
-		        alertDialog.setMessage("You have not taken the BP. You will get stale data. Are you sure you want to proceed?");
+		        alertDialog.setMessage("You have got exactly the same data as before. Are you sure you want to update this to server?\n".concat("HR value:".concat(hr).concat("\n\nHP Value:").concat(hp).concat("\n\nLP value:").concat(lp)));
 		 
 		        // Setting Icon to Dialog
 		       // alertDialog.setIcon(R.drawable.delete);
 		 
 		        // Setting Positive "Yes" Button
-		        alertDialog.setNeutralButton("ok", new DialogInterface.OnClickListener() {
+		        alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		            @SuppressLint("SimpleDateFormat")
+					public void onClick(DialogInterface dialog,int which) {
+		 
+		            // Write your code here to invoke YES event
+		            //Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
+		            
+		            
+		            Calendar cal = Calendar.getInstance();
+		            cal.getTime();
+		            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		          //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
+		            send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
+		            
+		            dialog.cancel();
+		            
+	    			
+		            }
+
+					
+		        });
+		        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
 		            public void onClick(DialogInterface dialog,int which) {
 		 
 		            // Write your code here to invoke YES event
@@ -455,9 +488,60 @@ public class MainActivity extends ActionBarActivity {
 			    .setIcon(android.R.drawable.ic_dialog_alert)
 			     .show();*/
 			}
-			String hr = reader_temp1.getString("HR");
-			String hp = reader_temp1.getString("HP");
-			String lp = reader_temp1.getString("LP");
+			else {
+				
+				
+				AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+				 
+		        // Setting Dialog Title
+		        alertDialog.setTitle("Send data");
+		 
+		        // Setting Dialog Message
+		        alertDialog.setMessage("You get the following data. Are you sure to send it to server?.\n".concat("HR value:".concat(hr).concat("\n\nHP Value:").concat(hp).concat("\n\nLP value:").concat(lp)));
+		 
+		        // Setting Icon to Dialog
+		       // alertDialog.setIcon(R.drawable.delete);
+		 
+		        // Setting Positive "Yes" Button
+		        alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		            @SuppressLint("SimpleDateFormat")
+					public void onClick(DialogInterface dialog,int which) {
+		 
+		            // Write your code here to invoke YES event
+		            //Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
+		            	
+		            	Calendar cal = Calendar.getInstance();
+			            cal.getTime();
+			            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			          //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
+			            send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
+		            
+		            dialog.cancel();
+		            
+	    			
+		            }
+		        });
+		        alertDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+		            public void onClick(DialogInterface dialog,int which) {
+		 
+		            // Write your code here to invoke YES event
+		            //Toast.makeText(getApplicationContext(), "You clicked on YES", Toast.LENGTH_SHORT).show();
+		            
+		            dialog.cancel();
+		            
+	    			
+		            }
+		        });
+		        
+		        alertDialog.show();
+		
+				
+				
+				
+				
+				
+			}
+			
 			Editor editor = sharedpreferences.edit();
 		  	editor.putString(lastdataid,reader_temp1.getString("DataID"));
 		    editor.commit();//Committing all the above changes to the editor
@@ -493,6 +577,41 @@ public class MainActivity extends ActionBarActivity {
 	  return true;
 		
 };
+//send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
+private void send_data_to_server(String patient_name,String patient_id, String hr, String hp, String lp,String imei, String measurement_time, String username,String password) {
+	// TODO Auto-generated method stub
+	final String server_url = "http://hdmstaging.jiocloud.com/ihealthws/rest/jio/postresult";
+
+	AsyncHttpClient client = new AsyncHttpClient();
+	RequestParams params = new RequestParams();
+	params.add("PATIENT_NAME",patient_name);
+	params.add("PATIENT_ID",patient_id);
+	params.add("DIASTOLIC",hr);
+	params.add("SYSTOLIC",hp);
+	params.add("IMEI_NO",imei);
+	params.add("MEASUREMENT_TIME",measurement_time);
+	params.add("FACILITY_NAME","POK");
+	params.add("USERNAME",username);
+	params.add("IPASSWORD",password);
+	client.post(server_url,params,new AsyncHttpResponseHandler() {
+		   @Override
+		   public void onSuccess(String response) {
+			   
+			   System.out.println(response);
+			   
+			   
+		   }
+		   @Override
+		     public void onFailure(int statusCode, Throwable error,String message){
+		         // Response failed :(
+			   Toast.makeText(getApplicationContext(),message.concat("Check your internet connection"),Toast.LENGTH_LONG).show();
+		     }
+	});
+	
+	
+	
+	
+}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -518,3 +637,4 @@ public class MainActivity extends ActionBarActivity {
 
 
 }
+
