@@ -1,16 +1,14 @@
 package com.example.jio_bp;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.TelephonyManager;
 import android.annotation.SuppressLint;
@@ -454,7 +452,12 @@ public class MainActivity extends ActionBarActivity {
 		            cal.getTime();
 		            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 		          //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
-		            send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
+		            try {
+						send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 		            
 		            dialog.cancel();
 		            
@@ -514,7 +517,12 @@ public class MainActivity extends ActionBarActivity {
 			            cal.getTime();
 			            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 			          //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
-			            send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
+			            try {
+							send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
+						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 		            
 		            dialog.cancel();
 		            
@@ -578,35 +586,30 @@ public class MainActivity extends ActionBarActivity {
 		
 };
 //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
-private void send_data_to_server(String patient_name,String patient_id, String hr, String hp, String lp,String imei, String measurement_time, String username,String password) {
+private void send_data_to_server(String patient_name,String patient_id, String hr, String hp, String lp,String imei, String measurement_time, String username,String password) throws UnsupportedEncodingException {
 	// TODO Auto-generated method stub
-	final String server_url = "http://hdmstaging.jiocloud.com/ihealthws/rest/jio/postresult";
-
-	AsyncHttpClient client = new AsyncHttpClient();
-	RequestParams params = new RequestParams();
-	params.add("PATIENT_NAME",patient_name);
-	params.add("PATIENT_ID",patient_id);
-	params.add("DIASTOLIC",hr);
-	params.add("SYSTOLIC",hp);
-	params.add("IMEI_NO",imei);
-	params.add("MEASUREMENT_TIME",measurement_time);
-	params.add("FACILITY_NAME","POK");
-	params.add("USERNAME",username);
-	params.add("IPASSWORD",password);
-	client.post(server_url,params,new AsyncHttpResponseHandler() {
+	String server_url = "http://hdmstaging.jiocloud.com/ihealthws/rest/jio/postresult?PATIENT_ID=".concat(patient_id).concat("&USERNAME=").concat(username).concat("&IPASSWORD=").concat(password).concat("&FACILITY_NAME=POK").concat("&MEASUREMENT_TIME=").concat(measurement_time).concat("&DIASTOLIC=").concat(hr).concat("&SYSTOLIC=").concat(hp).concat("&IMEI_NO=").concat(imei).concat("&PATIENT_NAME=").concat("avneesh kumar");
+	server_url = URLEncoder.encode(server_url,"UTF-8");
+	AsyncHttpClient client1 = new AsyncHttpClient();
+	
+	
+	client1.post(server_url,null,new AsyncHttpResponseHandler() {
 		   @Override
 		   public void onSuccess(String response) {
 			   
 			   System.out.println(response);
 			   
 			   
+			   
 		   }
-		   @Override
+		   
+	/*	@Override
 		     public void onFailure(int statusCode, Throwable error,String message){
 		         // Response failed :(
 			   Toast.makeText(getApplicationContext(),message.concat("Check your internet connection"),Toast.LENGTH_LONG).show();
-		     }
+		     }*/
 	});
+	
 	
 	
 	
