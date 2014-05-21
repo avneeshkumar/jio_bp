@@ -1,16 +1,35 @@
 package com.example.jio_bp;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.TelephonyManager;
+import android.util.Xml;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -450,11 +469,14 @@ public class MainActivity extends ActionBarActivity {
 		            
 		            Calendar cal = Calendar.getInstance();
 		            cal.getTime();
-		            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		            SimpleDateFormat sdf = new SimpleDateFormat("dd:MM:yyyy:hh:mm:ss");
 		          //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
 		            try {
 						send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
 					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ClientProtocolException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -515,11 +537,14 @@ public class MainActivity extends ActionBarActivity {
 		            	
 		            	Calendar cal = Calendar.getInstance();
 			            cal.getTime();
-			            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			            SimpleDateFormat sdf = new SimpleDateFormat("dd:MM:yyyy:hh:mm:ss");
 			          //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
 			            try {
 							send_data_to_server("Avneesh Kumar","27",hr,hp,lp,imei,sdf.format(cal.getTime()),"Avneesh","kumar");
 						} catch (UnsupportedEncodingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ClientProtocolException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -586,29 +611,93 @@ public class MainActivity extends ActionBarActivity {
 		
 };
 //send_data_to_server(patient_name,patient_id,hr,hp,lp,imei,measurement_time,username,password);
-private void send_data_to_server(String patient_name,String patient_id, String hr, String hp, String lp,String imei, String measurement_time, String username,String password) throws UnsupportedEncodingException {
+private void send_data_to_server(String patient_name,String patient_id, String hr, String hp, String lp,String imei, String measurement_time, String username,String password) throws UnsupportedEncodingException, ClientProtocolException {
 	// TODO Auto-generated method stub
-	String server_url = "http://hdmstaging.jiocloud.com/ihealthws/rest/jio/postresult?PATIENT_ID=".concat(patient_id).concat("&USERNAME=").concat(username).concat("&IPASSWORD=").concat(password).concat("&FACILITY_NAME=POK").concat("&MEASUREMENT_TIME=").concat(measurement_time).concat("&DIASTOLIC=").concat(hr).concat("&SYSTOLIC=").concat(hp).concat("&IMEI_NO=").concat(imei).concat("&PATIENT_NAME=").concat("avneesh kumar");
-	server_url = URLEncoder.encode(server_url,"UTF-8");
+	String server_url = "http://hdmstaging.jiocloud.com/ihealthws/rest/jio/postresult?PATIENT_ID=".concat(patient_id).concat("&USERNAME=").concat(username).concat("&IPASSWORD=").concat(password).concat("&FACILITY_NAME=POK").concat("&MEASUREMENT_TIME=").concat(measurement_time).concat("&DIASTOLIC=").concat(hr).concat("&SYSTOLIC=").concat(hp).concat("&IMEI_NO=").concat(imei).concat("&PATIENT_NAME=").concat(URLEncoder.encode(patient_name,"UTF-8"));
+	
+	
+	System.out.println(server_url);
 	AsyncHttpClient client1 = new AsyncHttpClient();
 	
 	
-	client1.post(server_url,null,new AsyncHttpResponseHandler() {
+	client1.post(server_url,new AsyncHttpResponseHandler() {
 		   @Override
 		   public void onSuccess(String response) {
 			   
 			   System.out.println(response);
+			   //Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG).show();
+			   XmlPullParser parser = Xml.newPullParser();
+			   try {
+				parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+				InputStream is = new ByteArrayInputStream(response.getBytes());
+				parser.setInput(is , null);
+				parser.nextTag();
+				String status = readFeed(parser);
+				Toast.makeText(getApplicationContext(),status,Toast.LENGTH_LONG).show();
+				
+
+			} catch (XmlPullParserException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+
 			   
 			   
 			   
 		   }
 		   
-	/*	@Override
+		private String readFeed(XmlPullParser parser) {
+			// TODO Auto-generated method stub
+			
+			
+			try {
+				parser.require(XmlPullParser.START_TAG, null, "DocumentElement");
+				 while (parser.next() != XmlPullParser.END_TAG) {
+					 
+					 String name = parser.getName();
+					 if (name.equals("iHealthBp")) {
+						// System.out.println("parse ho raha hai");
+						 parser.next();
+						 name= parser.getName();
+						 if(name.equals("Status")){
+							parser.next();
+							String res = parser.getText();
+							return res;
+
+							 
+						 }
+						 
+						 
+
+
+				            
+				     }
+
+
+				 }
+
+				
+			} catch (XmlPullParserException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return "Error in xml";
+			
+			//return null;
+		}
+
+		@Override
 		     public void onFailure(int statusCode, Throwable error,String message){
 		         // Response failed :(
 			   Toast.makeText(getApplicationContext(),message.concat("Check your internet connection"),Toast.LENGTH_LONG).show();
-		     }*/
+		     }
 	});
+	
+	
 	
 	
 	
